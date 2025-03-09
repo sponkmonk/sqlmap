@@ -177,6 +177,9 @@ def cmdLineParser(argv=None):
         request.add_argument("--drop-set-cookie", dest="dropSetCookie", action="store_true",
             help="Ignore Set-Cookie header from response")
 
+        request.add_argument("--http2", dest="http2", action="store_true",
+            help="Use HTTP version 2 (experimental)")
+
         request.add_argument("--mobile", dest="mobile", action="store_true",
             help="Imitate smartphone through HTTP User-Agent header")
 
@@ -1007,6 +1010,10 @@ def cmdLineParser(argv=None):
                 argv[i] = ""
             elif argv[i] in DEPRECATED_OPTIONS:
                 argv[i] = ""
+            elif argv[i] in ("-s", "--silent"):
+                if i + 1 < len(argv) and argv[i + 1].startswith('-') or i + 1 == len(argv):
+                    argv[i] = ""
+                    conf.verbose = 0
             elif argv[i].startswith("--data-raw"):
                 argv[i] = argv[i].replace("--data-raw", "--data", 1)
             elif argv[i].startswith("--auth-creds"):
@@ -1015,7 +1022,6 @@ def cmdLineParser(argv=None):
                 argv[i] = argv[i].replace("--drop-cookie", "--drop-set-cookie", 1)
             elif re.search(r"\A--tamper[^=\s]", argv[i]):
                 argv[i] = ""
-                continue
             elif re.search(r"\A(--(tamper|ignore-code|skip))(?!-)", argv[i]):
                 key = re.search(r"\-?\-(\w+)\b", argv[i]).group(1)
                 index = auxIndexes.get(key, None)
